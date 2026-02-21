@@ -1,25 +1,23 @@
 import { PostHook } from "./PostHook"
 import { PreHook } from "./PreHook"
 export class HookEngine {
-	constructor(
-		private preHook: PreHook,
-		private postHook: PostHook,
-	) {}
+  constructor(
+    private preHook: PreHook,
+    private postHook: PostHook
+  ) {}
 
-	async execute(toolName: string, args: any, next: () => Promise<any>) {
-		// Pre
-		const preResult = await this.preHook.run(toolName, args)
+  async interceptToolCall(
+    toolName: string,
+    args: any,
+    execute: () => Promise<any>
+  ) {
+    await this.preHook.run(toolName)
 
-		if (toolName === "select_active_intent") {
-			return preResult
-		}
+    const result = await execute()
 
-		// Execute actual tool
-		const result = await next()
+    await this.postHook.run(toolName, args, result)
 
-		// Post
-		await this.postHook.run(toolName, args, result)
-
-		return result
-	}
+    return result
+  }
 }
+
