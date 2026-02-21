@@ -1,10 +1,77 @@
 active_intents:
-  - id: "INT-001"
-    name: "Build Weather API"
-    status: "IN_PROGRESS"
-    owned_scope:
-      - "src/weather/**"
+
+  - id: "INT-FEATURE"
+    name: "Feature Development"
+    description: "Implement new functionality, create files, expand architecture, or add capabilities."
+    status: "AVAILABLE"
+    permissions:
+      allow_file_create: true
+      allow_file_modify: true
+      allow_file_delete: true
+      allow_execute_command: true
     constraints:
-      - "Use only internal API, no external services"
+      - "Changes must stay within the declared task scope"
+      - "New files must follow project structure conventions"
     acceptance_criteria:
-      - "Unit tests in tests/weather/ pass"
+      - "Code compiles"
+      - "Tests pass if applicable"
+
+  - id: "INT-BUGFIX"
+    name: "Bug Fix"
+    description: "Fix broken behavior, errors, or failing tests without introducing new features."
+    status: "AVAILABLE"
+    permissions:
+      allow_file_create: false
+      allow_file_modify: true
+      allow_file_delete: false
+      allow_execute_command: true
+    constraints:
+      - "Do not introduce new features"
+      - "Limit modifications to affected files"
+    acceptance_criteria:
+      - "Original issue resolved"
+      - "No new test failures introduced"
+
+  - id: "INT-REFACTOR"
+    name: "Refactor"
+    description: "Improve structure, readability, or maintainability without changing behavior."
+    status: "AVAILABLE"
+    permissions:
+      allow_file_create: false
+      allow_file_modify: true
+      allow_file_delete: false
+      allow_execute_command: false
+    constraints:
+      - "No behavioral changes"
+      - "Public interfaces must remain stable"
+    acceptance_criteria:
+      - "Behavior unchanged"
+      - "Code quality improved"
+
+  - id: "INT-ANALYSIS"
+    name: "Analysis / Read Only"
+    description: "Analyze, review, explain, or inspect the codebase without modifying it."
+    status: "AVAILABLE"
+    permissions:
+      allow_file_create: false
+      allow_file_modify: false
+      allow_file_delete: false
+      allow_execute_command: false
+    constraints:
+      - "No file mutations allowed"
+    acceptance_criteria:
+      - "Clear and accurate analysis provided"
+
+  - id: "INT-OPS"
+    name: "Operational / Environment Tasks"
+    description: "Run build commands, manage dependencies, or adjust configuration."
+    status: "AVAILABLE"
+    permissions:
+      allow_file_create: true
+      allow_file_modify: true
+      allow_file_delete: false
+      allow_execute_command: true
+    constraints:
+      - "Do not alter business logic files unless explicitly requested"
+    acceptance_criteria:
+      - "Environment or build task completes successfully"

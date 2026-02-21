@@ -1,0 +1,1 @@
+{"version":3,"file":"PreHook.d.ts","sourceRoot":"","sources":["PreHook.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,iBAAiB,CAAA;AAE/C,qBAAa,OAAO;IACP,OAAO,CAAC,aAAa;gBAAb,aAAa,EAAE,aAAa;IAI/C,sBAAsB,CAAC,WAAW,EAAE,MAAM;IAgCpC,GAAG,CAAC,WAAW,EAAE,MAAM;CAY9B"}

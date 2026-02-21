@@ -3,29 +3,52 @@ import { IntentService } from "./IntentService"
 export class PreHook {
 	constructor(private intentService: IntentService) {}
 
-	async run(toolName: string, args: any) {
-		if (toolName === "select_active_intent") {
-			const intent = this.intentService.selectIntent(args.intent_id)
 
-			return {
-				intent_context: {
-					constraints: intent.constraints,
-					owned_scope: intent.owned_scope,
-				},
-			}
-		}
+  // --- Step 1: Add keyword-based filtering ---
+  filterCandidateIntents(userCommand: string) {
+    const candidates: string[] = []
+    const cmd = userCommand.toLowerCase()
 
-		if (toolName === "write_to_file") {
-			const activeIntent = this.intentService.getActiveIntent()
+    if (/\b(fix|bug|error|fail|issue|resolve|patch|correct)\b/.test(cmd)) {
+      candidates.push("INT-BUGFIX")
+    }
 
-			if (!activeIntent) {
-				throw new Error("You must select an active intent before writing files.")
-			}
-			// Return something even if nothing needs to be returned
-			return {}
-		}
+    if (/\b(create|add|implement|new|feature|build|develop|generate|write|insert|setup)\b/.test(cmd)) {
+      candidates.push("INT-FEATURE")
+    }
 
-		// Default return for any other toolName
-		return {}
-	}
+    if (/\b(refactor|cleanup|optimize|restructure|improve|reorganize|simplify)\b/.test(cmd)) {
+      candidates.push("INT-REFACTOR")
+    }
+
+    if (/\b(analyze|inspect|explain|review|understand|read|check|look at|audit|summarize)\b/.test(cmd)) {
+      candidates.push("INT-ANALYSIS")
+    }
+
+    if (/\b(build|install|setup|config|run|deploy|execute|environment|dependency|command)\b/.test(cmd)) {
+      candidates.push("INT-OPS")
+    }
+
+    if (candidates.length === 0) {
+      candidates.push("INT-ANALYSIS") // safe fallback
+    }
+
+    return candidates
+  }
+
+  // --- Step 2: Update your run() method ---
+  async run(userCommand: string) {
+    // 2a. Filter candidate intents based on keywords
+    const candidateIntents = this.filterCandidateIntents(userCommand)
+
+    // 2b. Let IntentService pick the best intent from filtered candidates
+    const selectedIntent = await this.intentService.selectIntentFromCandidates(
+      userCommand,
+      candidateIntents
+    )
+
+    return selectedIntent
+  }
 }
+
+

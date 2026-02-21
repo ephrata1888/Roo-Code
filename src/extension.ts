@@ -2,6 +2,8 @@ import * as vscode from "vscode"
 import * as dotenvx from "@dotenvx/dotenvx"
 import * as fs from "fs"
 import * as path from "path"
+import { llmClient } from "./core/assistant-message/presentAssistantMessage"
+
 
 // Load environment variables from .env file
 // The extension-level .env is optional (not shipped in production builds).
@@ -118,6 +120,7 @@ async function checkWorktreeAutoOpen(
 // This method is called when your extension is activated.
 // Your extension is activated the very first time the command is executed.
 export async function activate(context: vscode.ExtensionContext) {
+	console.log("EXTENSION ACTIVATED") // ← test log
 	extensionContext = context
 	outputChannel = vscode.window.createOutputChannel(Package.outputChannel)
 	context.subscriptions.push(outputChannel)
@@ -453,6 +456,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	initializeModelCacheRefresh()
 
 	return new API(outputChannel, provider, socketPath, enableLogging)
+	const result = await llmClient.complete("Say ONLY TEST")
+    console.log("LLM RESULT:", result)
 }
 
 // This method is called when your extension is deactivated.
