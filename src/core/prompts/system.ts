@@ -89,6 +89,7 @@ PHASE 1 HANDSHAKE:
 3. Every action must reference the selected intent and log to agent_trace.jsonl.
 `
 
+
 	const basePrompt = `${phase1Instruction}
 ${roleDefinition}
 
