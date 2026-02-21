@@ -1,8 +1,17 @@
 {
-	"extends": "@roo-code/config-typescript/base.json",
-	"compilerOptions": {
-		"types": ["node"]
-	},
-	"exclude": ["node_modules"],
-	"include": ["scripts/*.ts"]
+  "extends": "@roo-code/config-typescript/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "baseUrl": "src",
+    "paths": {
+      "hooks/*": ["hooks/*"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*.ts", "scripts/*.ts"],
+  "exclude": ["node_modules"]
 }
