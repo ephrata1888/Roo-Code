@@ -40,7 +40,44 @@ import { codebaseSearchTool } from "../tools/CodebaseSearchTool"
 
 import { formatResponse } from "../prompts/responses"
 import { sanitizeToolUseId } from "../../utils/tool-id"
+import { HookEngine } from "../../hooks/HookEngine"
+import { PostHook } from "../../hooks/PostHook"
+import { PreHook } from "../../hooks/PreHook"
+import { IntentService } from "../../hooks/IntentService"
+import fetch from "node-fetch" // or your HTTP client
 
+export const llmClient = {
+				async complete(prompt: string): Promise<string> {
+					try {
+					const apiKey = process.env.GEMINI_API_KEY // set this securely
+					const response = await fetch(
+						"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
+						{
+						method: "POST",
+						headers: {
+							"Authorization": `Bearer ${apiKey}`,
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							prompt: [{ type: "text", text: prompt }],
+							maxOutputTokens: 50,
+						}),
+						}
+					)
+
+					const json: any = await response.json()
+
+					// The Gemini API returns text in `json.output[0].content[0].text`
+					// This depends on the SDK/response format.
+					const textOutput = json?.output?.[0]?.content?.[0]?.text || json?.output_text || ""
+
+					return textOutput.trim()
+					} catch (err) {
+					console.error("Gemini flash LLM call failed:", err)
+					return ""
+					}
+				},
+			}
 /**
  * Processes and presents assistant message content to the user interface.
  *
@@ -675,14 +712,39 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 			}
 
+			
+
+
+			const workspaceRoot = "C:\\Users\\Ephi\\Roo-Code\\src"
+			const intentService = new IntentService(workspaceRoot, llmClient)
+			const preHook = new PreHook(intentService)
+			const postHook = new PostHook()
+			const hookEngine = new HookEngine(
+				new PreHook(intentService),
+                new PostHook()
+			)
+			
+
+			
+
+
+
+
 			switch (block.name) {
 				case "write_to_file":
-					await checkpointSaveAndMark(cline)
-					await writeToFileTool.handle(cline, block as ToolUse<"write_to_file">, {
-						askApproval,
-						handleError,
-						pushToolResult,
-					})
+					await hookEngine.interceptToolCall(
+						"write_to_file",
+						block,
+						async () => {
+							await checkpointSaveAndMark(cline)
+							return await writeToFileTool.handle(cline, block, {
+								askApproval,
+								handleError,
+								pushToolResult,
+							})
+						}
+					)
+
 					break
 				case "update_todo_list":
 					await updateTodoListTool.handle(cline, block as ToolUse<"update_todo_list">, {
@@ -762,13 +824,21 @@ export async function presentAssistantMessage(cline: Task) {
 					})
 					break
 				case "execute_command":
-					await executeCommandTool.handle(cline, block as ToolUse<"execute_command">, {
-						askApproval,
-						handleError,
-						pushToolResult,
-					})
+					await hookEngine.interceptToolCall(
+						"execute_command",
+						block,
+						async () => {
+							return await executeCommandTool.handle(cline, block, {
+								askApproval,
+								handleError,
+								pushToolResult,
+							})
+						}
+					)
+
 					break
 				case "read_command_output":
+					
 					await readCommandOutputTool.handle(cline, block as ToolUse<"read_command_output">, {
 						askApproval,
 						handleError,
